@@ -17,7 +17,7 @@
 /*******************************************************************************************************************************
  **                                                       Global Variables                                                     **
  ********************************************************************************************************************************/
-extern Com_Type Com;
+extern "C++" Com_Type Com;
 
 static ComState_Type ComState = COM_UNINIT;
 
@@ -834,232 +834,232 @@ void Com_TxConfirmation(PduIdType TxPduId)
                      that are not directly handled within the COM's function invoked by the RTE,
                      for example Com_SendSignal
  *******************************************************************************************************************************/
-void Com_MainFunctionTx(void)
-{
-    uint8 IPduIdIndex;
-    uint8 SignalIdIndex;
-    uint8 SignalGroupIdIndex;
-    Com_IPduType *ComIPduLoc;
-    ComTeamIPdu_Type *ComTeamIPduLoc;
-    boolean MinimumDelayTimerLoc=true;
-
-    if(ComState == COM_READY)
-    {
-        for ( IPduIdIndex = 0; IPduIdIndex < ComMaxIPduCnt; IPduIdIndex++)
-        {
-            ComIPduLoc =&Com.ComConfig.ComIPdu[IPduIdIndex];
-            ComTeamIPduLoc = &ComTeamConfig.ComTeamIPdu[IPduIdIndex];
-
-            /* check if  IPdu Direction should be transmitted */
-            if (ComIPduLoc->ComIPduDirection == Send)
-            {
-                #if(ComEnableMDTForCyclicTransmission == true)
-
-                    if(ComTeamIPduLoc->ComTeamTxMode.ComTeamMinimumDelayTimer> 0)
-                    {
-                        ComTeamIPduLoc->ComTeamTxMode.ComTeamMinimumDelayTimer -= ComTxTimeBase;
-                    }
-                    else
-                    {
-                        /*misra*/
-                    }
-
-                    if(ComTeamIPduLoc->ComTeamTxMode.ComTeamMinimumDelayTimer<=0)
-                    {
-                        MinimumDelayTimerLoc=true;
-                    }
-                    else
-                    {
-                        MinimumDelayTimerLoc=false;
-                    }
-                #endif
-
-                /* check If IPDU has periodic transmission mode*/
-                if (ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == PERIODIC)
-                {
-                    if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod > 0)
-                    {
-                        ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod -= ComTxTimeBase;
-                    }
-					else
-					{
-						
-					}
-                    if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod<= 0)&&(MinimumDelayTimerLoc))
-                    {
-                        if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
-                        {
-                            /*Reset periodic timer.*/
-                            ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod= ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeTimePeriod;
-                            #if(ComEnableMDTForCyclicTransmission == true)
-                                ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
-                            #endif
-                        }
-                        else
-                        {
-                            /*misra*/
-                        }
-                    }
-                    else
-                    {
-                        /*misra*/
-                    }
-                }
-                /* check If IPDU has DIRECT transmission mode*/
-                else if (ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == DIRECT)
-                {
-                    if (ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions > 0)
-                    {
-                        if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod > 0)
-                        {
-                            ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod -= ComTxTimeBase;
-                        }
-                        else if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod <= 0)&&(MinimumDelayTimerLoc))
-                        {
-                            if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
-                            {   /*Reset periodic timer.*/
-                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod = ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeRepetitionPeriod;
-                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions--;
-                                #if(ComEnableMDTForCyclicTransmission == true)
-                                    ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
-                                #endif
-                            }
-                            else
-                            {
-                                /*misra*/
-                            }
-                        }
-                        else
-                        {
-                            /*misra*/
-                        }
-                    }
-                    else
-                    {
-                        /*misra*/
-                    }
-                }
-                /* check If IPDU has MIXED transmission mode*/
-                else if (ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == MIXED)
-                {
-                    /*it time for a direct transmission*/
-                    if (ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions > 0)
-                    {
-                        if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod > 0)
-                        {
-                        ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod    -= ComTxTimeBase;
-                        }
-                        else if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod <= 0)&&(MinimumDelayTimerLoc))
-                        {
-                            if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
-                            {   /*Reset periodic timer.*/
-                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod = ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeRepetitionPeriod;
-                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions--;
-                                #if(ComEnableMDTForCyclicTransmission == true)
-                                    ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
-                                #endif
-                            }
-                            else
-                            {
-                                /*misra*/
-                            }
-                        }
-                        else
-                        {
-                            /*misra*/
-                        }
-                    } /*it time for a periodic transmission*/
-                    else
-                    {
-                        if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod> 0)
-                        {
-                            ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod -= ComTxTimeBase;
-                        }
-                        else if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod<= 0)&&(MinimumDelayTimerLoc))
-                        {
-                            if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
-                            {   /*Reset periodic timer.*/
-                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod= ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeTimePeriod;
-                                #if(ComEnableMDTForCyclicTransmission == true)
-                                    ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
-                                #endif
-                            }
-                            else
-                            {
-                                /*misra*/
-                            }
-                        }
-                        else
-                        {
-                            /*misra*/
-                        }
-
-                    }
-                }
-                /* The IDPU has NONE transmission mode*/
-                else
-                {
-                    /* Don't send!*/
-                }
-                if(Com.ComConfig.ComIPdu[IPduIdIndex].ComIPduSignalProcessing==DEFERRED)
-                {
-                    for ( SignalIdIndex = 0; Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalRef[SignalIdIndex] !=NULL; SignalIdIndex++)
-                    {
-                        if(ComTeamConfig.ComTeamSignal[SignalIdIndex].ComTeamSignalConfirmed)
-                        {
-                            if(Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalRef[SignalIdIndex]->ComNotification !=NULL)
-                            {
-                                Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalRef[SignalIdIndex]->ComNotification();
-                            }
-                            else
-                            {
-                                /*misra*/
-                            }
-                            ComTeamConfig.ComTeamSignal[SignalIdIndex].ComTeamSignalConfirmed=false;
-                        }
-                        else
-                        {
-                             /*misra*/
-                        }
-                    }
-                    for ( SignalGroupIdIndex = 0; Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalGroupRef[SignalGroupIdIndex] !=NULL; SignalGroupIdIndex++)
-                    {
-                        if(ComTeamConfig.ComTeamSignalGroup[SignalGroupIdIndex].ComTeamSignalGroupConfirmed)
-                        {
-                            if(Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalGroupRef[SignalGroupIdIndex]->ComNotification !=NULL)
-                            {
-                                Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalGroupRef[SignalGroupIdIndex]->ComNotification();
-                            }
-                            else
-                            {
-                                /*misra*/
-                            }
-                            ComTeamConfig.ComTeamSignalGroup[SignalGroupIdIndex].ComTeamSignalGroupConfirmed=false;
-                        }
-                        else
-                        {
-                            /*misra*/
-                        }
-                    }
-                }
-                else
-                {
-                    /*misra*/
-                }
-            }
-            else
-            {
-             /*IPdu Direction is not send*/
-            }
-        }
-    }
-    else
-    {
-        /*misra*/
-    }
-
-    return;
-}
+//void Com_MainFunctionTx(void)
+//{
+//    uint8 IPduIdIndex;
+//    uint8 SignalIdIndex;
+//    uint8 SignalGroupIdIndex;
+//    Com_IPduType *ComIPduLoc;
+//    ComTeamIPdu_Type *ComTeamIPduLoc;
+//    boolean MinimumDelayTimerLoc=true;
+//
+//    if(ComState == COM_READY)
+//    {
+//        for ( IPduIdIndex = 0; IPduIdIndex < ComMaxIPduCnt; IPduIdIndex++)
+//        {
+//            ComIPduLoc =&Com.ComConfig.ComIPdu[IPduIdIndex];
+//            ComTeamIPduLoc = &ComTeamConfig.ComTeamIPdu[IPduIdIndex];
+//
+//            /* check if  IPdu Direction should be transmitted */
+//            if (ComIPduLoc->ComIPduDirection == Send)
+//            {
+//                #if(ComEnableMDTForCyclicTransmission == true)
+//
+//                    if(ComTeamIPduLoc->ComTeamTxMode.ComTeamMinimumDelayTimer> 0)
+//                    {
+//                        ComTeamIPduLoc->ComTeamTxMode.ComTeamMinimumDelayTimer -= ComTxTimeBase;
+//                    }
+//                    else
+//                    {
+//                        /*misra*/
+//                    }
+//
+//                    if(ComTeamIPduLoc->ComTeamTxMode.ComTeamMinimumDelayTimer<=0)
+//                    {
+//                        MinimumDelayTimerLoc=true;
+//                    }
+//                    else
+//                    {
+//                        MinimumDelayTimerLoc=false;
+//                    }
+//                #endif
+//
+//                /* check If IPDU has periodic transmission mode*/
+//                if (ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == PERIODIC)
+//                {
+//                    if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod > 0)
+//                    {
+//                        ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod -= ComTxTimeBase;
+//                    }
+//					else
+//					{
+//						
+//					}
+//                    if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod<= 0)&&(MinimumDelayTimerLoc))
+//                    {
+//                        if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
+//                        {
+//                            /*Reset periodic timer.*/
+//                            ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod= ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeTimePeriod;
+//                            #if(ComEnableMDTForCyclicTransmission == true)
+//                                ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
+//                            #endif
+//                        }
+//                        else
+//                        {
+//                            /*misra*/
+//                        }
+//                    }
+//                    else
+//                    {
+//                        /*misra*/
+//                    }
+//                }
+//                /* check If IPDU has DIRECT transmission mode*/
+//                else if (ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == DIRECT)
+//                {
+//                    if (ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions > 0)
+//                    {
+//                        if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod > 0)
+//                        {
+//                            ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod -= ComTxTimeBase;
+//                        }
+//                        else if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod <= 0)&&(MinimumDelayTimerLoc))
+//                        {
+//                            if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
+//                            {   /*Reset periodic timer.*/
+//                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod = ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeRepetitionPeriod;
+//                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions--;
+//                                #if(ComEnableMDTForCyclicTransmission == true)
+//                                    ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
+//                                #endif
+//                            }
+//                            else
+//                            {
+//                                /*misra*/
+//                            }
+//                        }
+//                        else
+//                        {
+//                            /*misra*/
+//                        }
+//                    }
+//                    else
+//                    {
+//                        /*misra*/
+//                    }
+//                }
+//                /* check If IPDU has MIXED transmission mode*/
+//                else if (ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == MIXED)
+//                {
+//                    /*it time for a direct transmission*/
+//                    if (ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions > 0)
+//                    {
+//                        if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod > 0)
+//                        {
+//                        ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod    -= ComTxTimeBase;
+//                        }
+//                        else if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod <= 0)&&(MinimumDelayTimerLoc))
+//                        {
+//                            if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
+//                            {   /*Reset periodic timer.*/
+//                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeRepetitionPeriod = ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeRepetitionPeriod;
+//                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions--;
+//                                #if(ComEnableMDTForCyclicTransmission == true)
+//                                    ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
+//                                #endif
+//                            }
+//                            else
+//                            {
+//                                /*misra*/
+//                            }
+//                        }
+//                        else
+//                        {
+//                            /*misra*/
+//                        }
+//                    } /*it time for a periodic transmission*/
+//                    else
+//                    {
+//                        if(ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod> 0)
+//                        {
+//                            ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod -= ComTxTimeBase;
+//                        }
+//                        else if((ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod<= 0)&&(MinimumDelayTimerLoc))
+//                        {
+//                            if(Com_TriggerIPDUSend(IPduIdIndex) == E_OK)
+//                            {   /*Reset periodic timer.*/
+//                                ComTeamIPduLoc->ComTeamTxMode.ComTeamTxModeTimePeriod= ComIPduLoc->ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeTimePeriod;
+//                                #if(ComEnableMDTForCyclicTransmission == true)
+//                                    ComTeamMinimumDelayTimerLoc=ComIPduLoc->ComTxIPdu.ComMinimumDelayTime;
+//                                #endif
+//                            }
+//                            else
+//                            {
+//                                /*misra*/
+//                            }
+//                        }
+//                        else
+//                        {
+//                            /*misra*/
+//                        }
+//
+//                    }
+//                }
+//                /* The IDPU has NONE transmission mode*/
+//                else
+//                {
+//                    /* Don't send!*/
+//                }
+//                if(Com.ComConfig.ComIPdu[IPduIdIndex].ComIPduSignalProcessing==DEFERRED)
+//                {
+//                    for ( SignalIdIndex = 0; Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalRef[SignalIdIndex] !=NULL; SignalIdIndex++)
+//                    {
+//                        if(ComTeamConfig.ComTeamSignal[SignalIdIndex].ComTeamSignalConfirmed)
+//                        {
+//                            if(Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalRef[SignalIdIndex]->ComNotification !=NULL)
+//                            {
+//                                Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalRef[SignalIdIndex]->ComNotification();
+//                            }
+//                            else
+//                            {
+//                                /*misra*/
+//                            }
+//                            ComTeamConfig.ComTeamSignal[SignalIdIndex].ComTeamSignalConfirmed=false;
+//                        }
+//                        else
+//                        {
+//                             /*misra*/
+//                        }
+//                    }
+//                    for ( SignalGroupIdIndex = 0; Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalGroupRef[SignalGroupIdIndex] !=NULL; SignalGroupIdIndex++)
+//                    {
+//                        if(ComTeamConfig.ComTeamSignalGroup[SignalGroupIdIndex].ComTeamSignalGroupConfirmed)
+//                        {
+//                            if(Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalGroupRef[SignalGroupIdIndex]->ComNotification !=NULL)
+//                            {
+//                                Com.ComConfig.ComIPdu[IPduIdIndex]. ComIPduSignalGroupRef[SignalGroupIdIndex]->ComNotification();
+//                            }
+//                            else
+//                            {
+//                                /*misra*/
+//                            }
+//                            ComTeamConfig.ComTeamSignalGroup[SignalGroupIdIndex].ComTeamSignalGroupConfirmed=false;
+//                        }
+//                        else
+//                        {
+//                            /*misra*/
+//                        }
+//                    }
+//                }
+//                else
+//                {
+//                    /*misra*/
+//                }
+//            }
+//            else
+//            {
+//             /*IPdu Direction is not send*/
+//            }
+//        }
+//    }
+//    else
+//    {
+//        /*misra*/
+//    }
+//
+//    return;
+//}
 
 
 /*********** **********************************************************************************************************************
@@ -1431,101 +1431,101 @@ uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId)
  Description:      
                         By a call to Com_TriggerIPDUSend the I-PDU with the given ID is triggered for transmission.
 *******************************************************************************************************************************/
-Std_ReturnType  Com_TriggerIPDUSend(PduIdType PduId)
-{
-    PduInfoType* pduinfo = &(PduInfoType){
-                            .SduDataPtr = Com.ComConfig.ComIPdu[PduId].ComBufferRef,
-                            .SduLength = Com.ComConfig.ComIPdu[PduId].ComIPduLength
-    };
-    uint8 ComSignalIndex, ComSignalGroupIndex, ComUpdateBitPositionLocal;
-
-    if ( PduId > ComMaxIPduCnt)
-    {
-#if (ComConfigurationUseDet == true )
-        Det_ReportError(MODULE_ID, INSTANCE_ID, 0x17, COM_E_PARAM);
-#endif
-        return E_NOT_OK ;
-    }
-    else if (ComState == COM_UNINIT)
-    {
-#if (ComConfigurationUseDet == true )
-        Det_ReportError(MODULE_ID, INSTANCE_ID, 0x17, COM_E_UNINIT);
-#endif
-        return E_NOT_OK ;
-    }
-    else {
-#if (ComEnableMDTForCyclicTransmission == true)
-        if(MinimumDelayTime == 0){
-#endif
-
-			if (Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxIPduClearUpdateBit == Transmit)
-			{
-				if( Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == PERIODIC ||
-					((Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == DIRECT || Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == MIXED)
-					&& ComTeamConfig.ComTeamIPdu[PduId].ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions == 1))
-				{
-					/* Loop over all Signals in this IPDU */
-					for (ComSignalIndex = 0; Com.ComConfig.ComIPdu[PduId].ComIPduSignalRef[ComSignalIndex] != NULL; ComSignalIndex++)
-					{
-						ComUpdateBitPositionLocal = Com.ComConfig.ComIPdu[PduId].ComIPduSignalRef[ComSignalIndex]->ComUpdateBitPosition;
-
-						/* Check if update bit is set*/
-						if (Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal / 8] & (1 << (ComUpdateBitPositionLocal % 8)))
-						{
-
-							/* Clear update bit */
-							Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal / 8] &= ~(1 << (ComUpdateBitPositionLocal % 8));
-						}
-						else
-						{
-
-						}
-					}
-					/* Loop over all Signal groups in this IPDU */
-					for (ComSignalGroupIndex = 0; Com.ComConfig.ComIPdu[PduId].ComIPduSignalGroupRef[ComSignalGroupIndex] != NULL; ComSignalGroupIndex++)
-					{
-						ComUpdateBitPositionLocal = Com.ComConfig.ComIPdu[PduId].ComIPduSignalGroupRef[ComSignalGroupIndex]->ComUpdateBitPosition;
-
-						/* Check if update bit is set*/
-						if (Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal / 8] & (1 << (ComUpdateBitPositionLocal % 8)))
-						{
-							/* Clear update bit */
-							Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal
-									/ 8] &= ~(1 << (ComUpdateBitPositionLocal % 8));
-						}
-						else
-						{
-
-						}
-					}
-				}
-				else
-				{
-					
-				}
-
-
-            #if ComEnableMDTForCyclicTransmission
-            ComTeamConfig.ComTeamIPdu[PduId]ComTeamTxMode.ComTeamMinimumDelayTimer = Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComMinimumDelayTime;
-            #endif
-            return E_OK;
-        }
-        else
-        {
-
-            return E_NOT_OK;
-
-        }
-
-#if (ComEnableMDTForCyclicTransmission == true)
-        }
-        else {
-            return E_NOT_OK;
-        }
-#endif
-
-    }
-
-}
-
+//Std_ReturnType  Com_TriggerIPDUSend(PduIdType PduId)
+//{
+//	PduInfoType* pduinfo = &(PduInfoType) {
+//		.SduDataPtr = Com.ComConfig.ComIPdu[PduId].ComBufferRef,
+//			.SduLength = Com.ComConfig.ComIPdu[PduId].ComIPduLength
+//	};
+//	uint8 ComSignalIndex, ComSignalGroupIndex, ComUpdateBitPositionLocal;
+//
+//	if (PduId > ComMaxIPduCnt)
+//	{
+//#if (ComConfigurationUseDet == true )
+//		Det_ReportError(MODULE_ID, INSTANCE_ID, 0x17, COM_E_PARAM);
+//#endif
+//		return E_NOT_OK;
+//	}
+//	else if (ComState == COM_UNINIT)
+//	{
+//#if (ComConfigurationUseDet == true )
+//		Det_ReportError(MODULE_ID, INSTANCE_ID, 0x17, COM_E_UNINIT);
+//#endif
+//		return E_NOT_OK;
+//	}
+//	else {
+//#if (ComEnableMDTForCyclicTransmission == true)
+//		if (MinimumDelayTime == 0) {
+//#endif
+//
+//			if (Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxIPduClearUpdateBit == Transmit)
+//			{
+//				if (Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == PERIODIC ||
+//					((Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == DIRECT || Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComTxModeFalse.ComTxMode.ComTxModeMode == MIXED)
+//						&& ComTeamConfig.ComTeamIPdu[PduId].ComTeamTxMode.ComTeamTxIPduNumberOfRepetitions == 1))
+//				{
+//					/* Loop over all Signals in this IPDU */
+//					for (ComSignalIndex = 0; Com.ComConfig.ComIPdu[PduId].ComIPduSignalRef[ComSignalIndex] != NULL; ComSignalIndex++)
+//					{
+//						ComUpdateBitPositionLocal = Com.ComConfig.ComIPdu[PduId].ComIPduSignalRef[ComSignalIndex]->ComUpdateBitPosition;
+//
+//						/* Check if update bit is set*/
+//						if (Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal / 8] & (1 << (ComUpdateBitPositionLocal % 8)))
+//						{
+//
+//							/* Clear update bit */
+//							Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal / 8] &= ~(1 << (ComUpdateBitPositionLocal % 8));
+//						}
+//						else
+//						{
+//
+//						}
+//					}
+//					/* Loop over all Signal groups in this IPDU */
+//					for (ComSignalGroupIndex = 0; Com.ComConfig.ComIPdu[PduId].ComIPduSignalGroupRef[ComSignalGroupIndex] != NULL; ComSignalGroupIndex++)
+//					{
+//						ComUpdateBitPositionLocal = Com.ComConfig.ComIPdu[PduId].ComIPduSignalGroupRef[ComSignalGroupIndex]->ComUpdateBitPosition;
+//
+//						/* Check if update bit is set*/
+//						if (Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal / 8] & (1 << (ComUpdateBitPositionLocal % 8)))
+//						{
+//							/* Clear update bit */
+//							Com.ComConfig.ComIPdu[PduId].ComBufferRef[ComUpdateBitPositionLocal
+//								/ 8] &= ~(1 << (ComUpdateBitPositionLocal % 8));
+//						}
+//						else
+//						{
+//
+//						}
+//					}
+//				}
+//				else
+//				{
+//
+//				}
+//
+//
+//#if ComEnableMDTForCyclicTransmission
+//				ComTeamConfig.ComTeamIPdu[PduId]ComTeamTxMode.ComTeamMinimumDelayTimer = Com.ComConfig.ComIPdu[PduId].ComTxIPdu.ComMinimumDelayTime;
+//#endif
+//				return E_OK;
+//			}
+//			else
+//			{
+//
+//				return E_NOT_OK;
+//
+//			}
+//
+//#if (ComEnableMDTForCyclicTransmission == true)
+//		}
+//		else {
+//			return E_NOT_OK;
+//		}
+//#endif
+//
+//	}
+//
+//}
+//
 

@@ -4,11 +4,15 @@
 #include <QAbstractSocket>
 #include <QDebug>
 
+Ui::MainWindowClass ui_extern;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    ui_extern = ui;
+    ui_extern.setupUi(this);
     ui.setupUi(this);
+
     _server.listen(QHostAddress::Any, 4242);
     connect(&_server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 

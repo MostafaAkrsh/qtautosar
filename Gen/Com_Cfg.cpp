@@ -37,7 +37,7 @@ uint8 ComIPdu1Buffer[2]; // signals of speed and tachometer
 
 void Com_CbkSignal0TxAck(void)
 {
-    //printf("Com_CbkSignal0TxAck\n");
+    ui_extern.output->setText("hello");
 }
 
 void Com_CbkSignal1TxAck(void)
@@ -83,6 +83,95 @@ Com_Type Com =
 {
     .ComConfig =
     {
+        .ComIPdu =
+        {
+            {
+               .ComIPduDirection = Send,
+               .ComIPduHandleId = 0,
+               .ComIPduSignalProcessing = IMMEDIATE,
+               .ComIPduType = NORMAL, // can be omiited
+               .ComIPduGroupRef =
+                {
+                    &Com.ComConfig.ComIPduGroup[0],
+                    NULL
+                },
+               .ComIPduSignalGroupRef =
+                {
+                    &Com.ComConfig.ComSignalGroup[0],
+                    NULL
+                },
+               .ComIPduSignalRef =
+                {
+                    &Com.ComConfig.ComSignal[0],
+                    &Com.ComConfig.ComSignal[1],
+                    &Com.ComConfig.ComSignal[2],
+                    &Com.ComConfig.ComSignal[3],
+                    &Com.ComConfig.ComSignal[4],
+                    &Com.ComConfig.ComSignal[5],
+                    &Com.ComConfig.ComSignal[6],
+                    NULL
+                },
+                .ComTxIPdu =
+                {
+                    .ComMinimumDelayTime = 0.5,
+                    .ComTxIPduClearUpdateBit = Confirmation,
+                    .ComTxIPduUnusedAreasDefault = 255,
+                    .ComTxModeFalse =
+                    {
+                        .ComTxMode =
+                        {
+                            .ComTxModeMode = PERIODIC,
+                            .ComTxModeNumberOfRepetitions = 2,
+                            .ComTxModeRepetitionPeriod = 2,
+                            .ComTxModeTimePeriod = 2
+                        }
+                    }
+                },
+                .ComBufferRef = ComIPdu0Buffer,
+                .ComIPduLength = 2
+            },
+            {
+               .ComIPduDirection = Send,
+               .ComIPduHandleId = 1,
+               .ComIPduSignalProcessing = DEFERRED,
+               .ComIPduType = NORMAL, // can be omiited
+               .ComIPduGroupRef =
+                {
+                    &Com.ComConfig.ComIPduGroup[1],
+                    NULL
+                },
+               .ComIPduSignalGroupRef =
+                {
+                    &Com.ComConfig.ComSignalGroup[1],
+                    NULL
+                },
+               .ComIPduSignalRef =
+                {
+                    &Com.ComConfig.ComSignal[7],
+                    &Com.ComConfig.ComSignal[8],
+                    NULL
+                },
+                .ComTxIPdu =
+                {
+                    .ComMinimumDelayTime = 0.5,
+                    .ComTxIPduClearUpdateBit = Confirmation,
+                    .ComTxIPduUnusedAreasDefault = 255,
+                    .ComTxModeFalse =
+                    {
+                        .ComTxMode =
+                        {
+                            .ComTxModeMode = PERIODIC,
+                            .ComTxModeNumberOfRepetitions = 2,
+                            .ComTxModeRepetitionPeriod = 2,
+                            .ComTxModeTimePeriod = 2
+                        }
+                    }
+                },
+                .ComBufferRef = ComIPdu1Buffer,
+                .ComIPduLength = 2
+            }
+        },
+
         .ComSignal =
         {
             { //
@@ -204,91 +293,7 @@ Com_Type Com =
              .ComBufferRef = ComSignal3Buffer
             }
         }
-        .ComIPdu =
-        {
-           .ComIPduLength = 2,
-           .ComIPduDirection = Send,
-           .ComIPduHandleId = 0,
-           .ComIPduSignalProcessing = IMMEDIATE,
-           .ComIPduType = NORMAL, // can be omiited
-           .ComIPduGroupRef =
-            {
-                &Com.ComConfig.ComIPduGroup[0],
-                NULL
-            },
-           .ComIPduSignalGroupRef =
-            {
-                &Com.ComConfig.ComSignalGroup[0],
-                NULL
-            },
-           .ComIPduSignalRef =
-            {
-                &Com.ComConfig.ComSignal[0],
-                &Com.ComConfig.ComSignal[1],
-                &Com.ComConfig.ComSignal[2],
-                &Com.ComConfig.ComSignal[3],
-                &Com.ComConfig.ComSignal[4],
-                &Com.ComConfig.ComSignal[5],
-                &Com.ComConfig.ComSignal[6],
-                NULL
-            },
-           .ComTxIPdu =
-            {
-                .ComMinimumDelayTime = 0.5,
-                .ComTxIPduClearUpdateBit = Confirmation,
-                .ComTxIPduUnusedAreasDefault = 255,
-                .ComTxModeFalse =
-                {
-                    .ComTxMode =
-                    {
-                        .ComTxModeMode = DIRECT,
-                        .ComTxModeNumberOfRepetitions = 2,
-                        .ComTxModeRepetitionPeriod = 2,
-                        .ComTxModeTimePeriod = 2
-                    }
-                }
-            },
-            .ComBufferRef = ComIPdu0Buffer
-        },
-            {
-                .ComIPduLength = 2,
-                .ComIPduDirection = Send, //Recieve
-                .ComIPduHandleId = 1,
-                .ComIPduSignalProcessing = DEFERRED,
-                .ComIPduType = NORMAL,
-                .ComIPduGroupRef =
-                {
-                    &Com.ComConfig.ComIPduGroup[1],
-                    NULL
-                },
-                .ComIPduSignalGroupRef =
-                {
-                    &Com.ComConfig.ComSignalGroup[1],
-                    NULL
-                },
-                .ComIPduSignalRef =
-                {
-                    &Com.ComConfig.ComSignal[7],
-                    &Com.ComConfig.ComSignal[8],
-                    NULL
-                },
-                .ComTxIPdu =
-                {
-                    .ComMinimumDelayTime = 0.5,
-                    .ComTxIPduClearUpdateBit = Confirmation,
-                    .ComTxIPduUnusedAreasDefault = 255,
-                    .ComTxModeFalse =
-                    {
-                        .ComTxMode =
-                        {
-                            .ComTxModeMode = PERIODIC,
-                            .ComTxModeNumberOfRepetitions = 2,
-                            .ComTxModeRepetitionPeriod = 2,
-                            .ComTxModeTimePeriod = 2
-                        }
-                    }
-                },
-                .ComBufferRef = ComIPdu1Buffer
-            }
-       }
+    }
+
+
 };
