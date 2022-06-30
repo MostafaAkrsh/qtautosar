@@ -2,7 +2,7 @@
 #include <QtWidgets/QApplication>
 #include "inc/com.h"
 
-extern Com_Type Com;
+extern "C++" Com_Type Com;
 struct foo { int a; char c = 'a'; };
 
 int main(int argc, char *argv[])

@@ -54,7 +54,7 @@
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>F:/Study Comp IV/_Graduation Project - GPU/diagrams/dash.png</pixmap>
+     <pixmap>dash.png</pixmap>
     </property>
    </widget>
    <widget class="QLabel" name="speed">
