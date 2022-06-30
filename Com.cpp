@@ -18,7 +18,6 @@
  **                                                       Global Variables                                                     **
  ********************************************************************************************************************************/
 extern Com_Type Com;
-
 static ComState_Type ComState = COM_UNINIT;
 
 ComTeamConfig_Type ComTeamConfig;
@@ -359,7 +358,6 @@ uint8 Com_SendSignal(Com_SignalIdType SignalId,const void* SignalDataPtr)
                         }
                         /*Set update bit*/
                         ComIPduLocal->ComBufferRef[ComSignalLocal->ComUpdateBitPosition / 8] |= 1 << (ComSignalLocal->ComUpdateBitPosition%8);
-
                         ComTeamConfig.ComTeamSignal[ComSignalLocal->ComHandleId].ComTeamSignalUpdated = true;
                     }
                     else

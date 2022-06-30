@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="cursor">
-   <cursorShape>BlankCursor</cursorShape>
+   <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
    <string>Dashboard (Server)</string>

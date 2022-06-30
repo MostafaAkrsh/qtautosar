@@ -15,7 +15,7 @@ AUTOSAR Version:            4.2.2
 
 #ifndef		STATUSTYPEDEFINED
 #define		 STATUSTYPEDEFINED
-#define					E_OK																		0x00u
+#define					E_OK																		0x05u
 #define 				E_NOT_OK 																0x01u
 typedef              unsigned char                                                         StatusType;    /* OSEK compliance */
 #endif

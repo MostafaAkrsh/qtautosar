@@ -40,7 +40,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Com.c">
+    <ClCompile Include="Com.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gen\Com_Cfg.cpp">

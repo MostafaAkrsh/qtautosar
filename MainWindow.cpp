@@ -3,16 +3,18 @@
 #include <QTcpSocket>
 #include <QAbstractSocket>
 #include <QDebug>
+#include "Platform_Types.h"
+#include "inc/Com.h"
 
-Ui::MainWindowClass ui_extern;
+Ui::MainWindowClass* ui_extern;
+extern uint8 ComIPdu0Buffer[2];
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    ui_extern = ui;
-    ui_extern.setupUi(this);
+    ui_extern = &ui;
+    ui_extern->setupUi(this);
     ui.setupUi(this);
-
     _server.listen(QHostAddress::Any, 4242);
     connect(&_server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 
@@ -54,17 +56,31 @@ void MainWindow::onReadyRead()
     QTcpSocket* sender = static_cast<QTcpSocket*>(QObject::sender());
     QByteArray datas = sender->readAll();
     ui.statusbar->showMessage(datas);
-    QString DataAsString = QString(datas);
-    if (DataAsString[0] == 'o');
 
+    /// <summary>
+    ///  QByte to array
+    /// </summary>
+    /// com_receive_signal(signal_id,ptr to data)
+    /// 
+    QString DataAsString = QString(datas);
+    uint8 signal = 0;
+    memcpy(ComIPdu0Buffer, datas.data(), datas.size());
+
+    Com_ReceiveSignal(0, &signal);
+   if (DataAsString[0] == 'o');
+
+   if (signal-122 == 1)
+   {
+       ui.fuel_b->setVisible((signal));
+   }
     else if (DataAsString[0] == 's')
         ui.speed->setText(DataAsString.mid(1));
 
     else if (DataAsString[0] == 'd')
         ui.degree->setText(DataAsString.mid(1));
+            // 1000 0001
 
-    else if (DataAsString[0] == 'f')
-        ui.fix_b->setVisible(DataAsString.mid(1).toInt());
+
     else if (DataAsString[0] == 'b')
         ui.battery_b->setVisible(DataAsString.mid(1).toInt());
     else if (DataAsString[0] == 'l')

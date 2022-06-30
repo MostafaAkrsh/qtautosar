@@ -1,9 +1,12 @@
 #include "MainWindow.h"
 #include <QtWidgets/QApplication>
 #include "inc/com.h"
+#include "QString"
 
-extern "C++" Com_Type Com;
-struct foo { int a; char c = 'a'; };
+// Recieve
+
+extern Com_Type Com;
+extern Ui::MainWindowClass* ui_extern;
 
 int main(int argc, char *argv[])
 {
@@ -13,8 +16,10 @@ int main(int argc, char *argv[])
 
     Com_Init(&(Com.ComConfig));
 
+    uint8 data=123;
+    const void* ptr = &data;
+    ui_extern->output->setText(QString::number(Com_SendSignal(0, ptr)));
         
-    foo f = { .a = 42 };
 
     return a.exec();
 }
