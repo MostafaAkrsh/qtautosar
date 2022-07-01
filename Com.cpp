@@ -396,11 +396,11 @@ uint8 Com_CheckUpdatedbit(Com_SignalIdType SignalId)
                 ComIPduLocal = &Com.ComConfig.ComIPdu[ComIPduIndex];
                 /*Get Signal*/
                 ComSignalLocal = Com.ComConfig.ComIPdu[ComIPduIndex].ComIPduSignalRef[ComSignalIndex];
-
+                uint8 byteindex = ComSignalLocal->ComUpdateBitPosition / 8;
                 /* Check the updated bit */
-                if ((ComIPduLocal->ComBufferRef[ComSignalLocal->ComUpdateBitPosition/8] & (1<< ComSignalLocal->ComUpdateBitPosition)))
+                if ((ComIPduLocal->ComBufferRef[byteindex] & (1<< ComSignalLocal->ComUpdateBitPosition - byteindex * 8)))
                 {
-                    ComIPduLocal->ComBufferRef[ComSignalLocal->ComUpdateBitPosition / 8] &= ~(1 << ComSignalLocal->ComUpdateBitPosition);
+                    ComIPduLocal->ComBufferRef[ComSignalLocal->ComUpdateBitPosition / 8] &= ~(1 << (ComSignalLocal->ComUpdateBitPosition - byteindex * 8));
                     return 1;
                 }
                 else
