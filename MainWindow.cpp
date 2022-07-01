@@ -66,34 +66,34 @@ void MainWindow::onReadyRead()
     uint8 signal = 0;
     memcpy(ComIPdu0Buffer, datas.data(), datas.size());
 
-    Com_ReceiveSignal(0, &signal);
    if (DataAsString[0] == 'o');
+   else {
+       if (Com_CheckUpdatedbit(0)) {
+           Com_ReceiveSignal(0, &signal);
+            ui.fuel_b->setVisible((signal));
+       }
 
-   if (signal-122 == 1)
-   {
-       ui.fuel_b->setVisible((signal));
+       else if (DataAsString[0] == 's')
+           ui.speed->setText(DataAsString.mid(1));
+
+       else if (DataAsString[0] == 'd')
+           ui.degree->setText(DataAsString.mid(1));
+       // 1000 0001
+
+
+       else if (DataAsString[0] == 'b')
+           ui.battery_b->setVisible(DataAsString.mid(1).toInt());
+       else if (DataAsString[0] == 'l')
+           ui.light_b->setVisible(DataAsString.mid(1).toInt());
+       else if (DataAsString[0] == 'p')
+           ui.opendoor_b->setVisible(DataAsString.mid(1).toInt());
+       else if (DataAsString[0] == 'u')
+           ui.fuel_b->setVisible(DataAsString.mid(1).toInt());
+       else if (DataAsString[0] == 'r')
+           ui.rarrow_b->setVisible(DataAsString.mid(1).toInt());
+       else if (DataAsString[0] == 'e')
+           ui.larrow_b->setVisible(DataAsString.mid(1).toInt());
    }
-    else if (DataAsString[0] == 's')
-        ui.speed->setText(DataAsString.mid(1));
-
-    else if (DataAsString[0] == 'd')
-        ui.degree->setText(DataAsString.mid(1));
-            // 1000 0001
-
-
-    else if (DataAsString[0] == 'b')
-        ui.battery_b->setVisible(DataAsString.mid(1).toInt());
-    else if (DataAsString[0] == 'l')
-        ui.light_b->setVisible(DataAsString.mid(1).toInt());
-    else if (DataAsString[0] == 'p')
-        ui.opendoor_b->setVisible(DataAsString.mid(1).toInt());
-    else if (DataAsString[0] == 'u')
-        ui.fuel_b->setVisible(DataAsString.mid(1).toInt());
-    else if (DataAsString[0] == 'r')
-        ui.rarrow_b->setVisible(DataAsString.mid(1).toInt());
-    else if (DataAsString[0] == 'e')
-        ui.larrow_b->setVisible(DataAsString.mid(1).toInt());
-
     for (QTcpSocket* socket : _sockets) {
         if (socket != sender)
             socket->write(QByteArray::fromStdString(sender->peerAddress().toString().toStdString() + ": " + datas.toStdString()));

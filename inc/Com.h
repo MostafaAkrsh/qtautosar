@@ -27,6 +27,7 @@ AUTOSAR Version:          								  4.2.2
 void Com_Init( const Com_ConfigType* config);
 uint8 Com_SendSignal(Com_SignalIdType SignalId,const void* SignalDataPtr);
 uint8 Com_ReceiveSignal(Com_SignalIdType SignalId,void* SignalDataPtr);
+uint8 Com_CheckUpdatedbit(Com_SignalIdType SignalId);
 void Com_RxIndication(PduIdType RxPduId,const PduInfoType* PduInfoPtr);
 void Com_TxConfirmation(PduIdType TxPduId);
 void Com_MainFunctionTx(void);

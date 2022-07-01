@@ -379,6 +379,40 @@ uint8 Com_SendSignal(Com_SignalIdType SignalId,const void* SignalDataPtr)
 }
 
 
+uint8 Com_CheckUpdatedbit(Com_SignalIdType SignalId)
+{
+    Com_SignalType* ComSignalLocal;
+    Com_IPduType* ComIPduLocal;
+    uint8 ComIPduIndex, ComSignalIndex, BitIndex;
+
+    /* Find the IPdu which contains this signal */
+    for (ComIPduIndex = 0; ComIPduIndex < ComMaxIPduCnt; ComIPduIndex++)
+    {
+        for (ComSignalIndex = 0; Com.ComConfig.ComIPdu[ComIPduIndex].ComIPduSignalRef[ComSignalIndex] != NULL; ComSignalIndex++)
+        {
+            if (Com.ComConfig.ComIPdu[ComIPduIndex].ComIPduSignalRef[ComSignalIndex]->ComHandleId == SignalId)
+            {
+                /* Get Pdu */
+                ComIPduLocal = &Com.ComConfig.ComIPdu[ComIPduIndex];
+                /*Get Signal*/
+                ComSignalLocal = Com.ComConfig.ComIPdu[ComIPduIndex].ComIPduSignalRef[ComSignalIndex];
+
+                /* Check the updated bit */
+                if ((ComIPduLocal->ComBufferRef[ComSignalLocal->ComUpdateBitPosition/8] & (1<< ComSignalLocal->ComUpdateBitPosition)))
+                {
+                    ComIPduLocal->ComBufferRef[ComSignalLocal->ComUpdateBitPosition / 8] &= ~(1 << ComSignalLocal->ComUpdateBitPosition);
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+    }
+}
+
+
 /*********************************************************************************************************************************
  Service name:               Com_ReceiveSignal
  Service ID:                    0x0b
@@ -441,6 +475,7 @@ uint8 Com_ReceiveSignal(Com_SignalIdType SignalId,void* SignalDataPtr)
 						ComIPduLocal = &Com.ComConfig.ComIPdu[ComIPduIndex];
 						/*Get Signal*/
 						ComSignalLocal = Com.ComConfig.ComIPdu[ComIPduIndex].ComIPduSignalRef[ComSignalIndex];
+                        *(ComSignalLocal->ComBufferRef) = 0;
 
 						/* Write data from IPdu buffer to Signal buffer*/
 						for(BitIndex = ComSignalLocal->ComBitPosition; BitIndex < ComSignalLocal->ComBitPosition + ComSignalLocal->ComBitSize; BitIndex++)
